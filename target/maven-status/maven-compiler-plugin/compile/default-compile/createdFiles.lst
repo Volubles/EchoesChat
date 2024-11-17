@@ -1,0 +1,16 @@
+com\voluble\echoeschat\utils\EmoteColor.class
+com\voluble\echoeschat\listeners\PlayerJoinListener.class
+com\voluble\echoeschat\ChatChannel.class
+com\voluble\echoeschat\utils\CommandRegistrar.class
+com\voluble\echoeschat\utils\HexColorUtil.class
+com\voluble\echoeschat\EchoesChat$1.class
+com\voluble\echoeschat\listeners\ChatEventListener.class
+com\voluble\echoeschat\format\ChatFormatter.class
+com\voluble\echoeschat\managers\EmoteColorManager$EmoteColorConfig.class
+com\voluble\echoeschat\EchoesChat.class
+com\voluble\echoeschat\commands\ChannelCommand.class
+com\voluble\echoeschat\commands\ChatCommand.class
+com\voluble\echoeschat\commands\ChatTabCompleter.class
+com\voluble\echoeschat\managers\EmoteColorManager.class
+com\voluble\echoeschat\EchoesChat$2.class
+com\voluble\echoeschat\managers\ChannelManager.class

@@ -1,0 +1,38 @@
+rp:
+  format: "{prefix}{player}: {message}"
+  range: 50
+  permission: "chat.rp"
+  default: true
+  enabled: true
+  prefix: "[RP]"
+  autoFormat: true
+  capitalizeAll: false
+  allowsEmotes: true
+  commands:
+    - /rp
+
+ooc:
+  format: "{prefix}{player}: {message}"
+  range: -1
+  permission: "chat.ooc"
+  default: false
+  enabled: true
+  prefix: "[OOC]"
+  autoFormat: false
+  capitalizeAll: false
+  allowsEmotes: false
+  commands:
+    - /ooc
+
+shout:
+  format: "{prefix}{player}: {message}"
+  range: -1
+  permission: "chat.shout"
+  default: false
+  enabled: true
+  prefix: "[SHOUT]"
+  commands:
+    - /shout
+  quotes: true
+  autoFormat: false
+  capitalizeAll: true

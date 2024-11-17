@@ -1,0 +1,5 @@
+name: EchoesChat
+version: '${project.version}'
+main: com.voluble.echoeschat.EchoesChat
+api-version: '1.21'
+

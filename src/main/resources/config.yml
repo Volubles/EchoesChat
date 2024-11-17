@@ -1,0 +1,25 @@
+# General plugin settings
+pluginVersion: 1.0.0
+
+# Configuration for emote colors
+emoteColors:
+  default:
+    color: "&#FFFFFF"
+    permission: ""
+    deniedMessage: "You cannot use this color."
+  red:
+    color: "&#FF0000"
+    permission: "emote.color.red"
+    deniedMessage: "You do not have permission to use red."
+  blue:
+    color: "&#0000FF"
+    permission: "emote.color.blue"
+    deniedMessage: "You do not have permission to use blue."
+  green:
+    color: "&#00FF00"
+    permission: "emote.color.green"
+    deniedMessage: "You do not have permission to use green."
+  yellow:
+    color: "&#FFFF00"
+    permission: "emote.color.yellow"
+    deniedMessage: "You do not have permission to use yellow."
