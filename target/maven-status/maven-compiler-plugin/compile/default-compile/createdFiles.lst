@@ -4,6 +4,7 @@ com\voluble\echoeschat\ChatChannel.class
 com\voluble\echoeschat\utils\CommandRegistrar.class
 com\voluble\echoeschat\utils\HexColorUtil.class
 com\voluble\echoeschat\EchoesChat$1.class
+com\voluble\echoeschat\utils\PlaceholderUtil.class
 com\voluble\echoeschat\listeners\ChatEventListener.class
 com\voluble\echoeschat\format\ChatFormatter.class
 com\voluble\echoeschat\managers\EmoteColorManager$EmoteColorConfig.class

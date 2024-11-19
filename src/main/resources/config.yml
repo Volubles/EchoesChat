@@ -4,7 +4,7 @@ pluginVersion: 1.0.0
 # Configuration for emote colors
 emoteColors:
   default:
-    color: "&#FFFFFF"
+    color: "&e"
     permission: ""
     deniedMessage: "You cannot use this color."
   red:

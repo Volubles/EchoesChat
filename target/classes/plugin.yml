@@ -1,5 +1,9 @@
 name: EchoesChat
 version: '1.0-SNAPSHOT'
 main: com.voluble.echoeschat.EchoesChat
-api-version: '1.21'
+api-version: '1.20'
+loadbefore:
+  - Essentials
+softdepend:
+  - PlaceholderAPI
 

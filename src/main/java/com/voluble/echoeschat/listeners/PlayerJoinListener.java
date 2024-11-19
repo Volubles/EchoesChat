@@ -7,15 +7,19 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 public class PlayerJoinListener implements Listener {
+
 	private final ChannelManager channelManager;
 	private final EmoteColorManager emoteColorManager;
 	private final Map<UUID, String> playerEmoteColors;
 
 	public PlayerJoinListener(ChannelManager channelManager, EmoteColorManager emoteColorManager, Map<UUID, String> playerEmoteColors) {
+
 		this.channelManager = channelManager;
 		this.emoteColorManager = emoteColorManager;
 		this.playerEmoteColors = playerEmoteColors;
@@ -25,10 +29,13 @@ public class PlayerJoinListener implements Listener {
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		// Assign player to the default channel
 		ChatChannel defaultChannel = channelManager.getDefaultChannel();
+
 		if (defaultChannel != null) {
 			channelManager.setPlayerChannel(event.getPlayer(), defaultChannel);
 		}
-
+		if (!channelManager.getMutedChannels().containsKey(event.getPlayer().getUniqueId())) {
+			channelManager.getMutedChannels().put(event.getPlayer().getUniqueId(), new ArrayList<>());
+		}
 		// Initialize the player's emote color if not already set
 		UUID playerUUID = event.getPlayer().getUniqueId();
 		if (!playerEmoteColors.containsKey(playerUUID)) {

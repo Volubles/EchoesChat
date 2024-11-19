@@ -1,38 +1,41 @@
 rp:
   format: "{prefix}{player}: {message}"
-  range: 50
-  permission: "chat.rp"
+  range: 10
+  readPermission: "channel.shout.read"
+  writePermission: "channel.shout.write"
   default: true
   enabled: true
+  quotes: true
   prefix: "[RP]"
   autoFormat: true
   capitalizeAll: false
-  allowsEmotes: true
   commands:
     - /rp
 
 ooc:
   format: "{prefix}{player}: {message}"
-  range: -1
-  permission: "chat.ooc"
+  range: -1                                        #-1 for global chat
+  readPermission: "channel.shout.read"
+  writePermission: "channel.shout.write"
   default: false
+  quotes: false
   enabled: true
   prefix: "[OOC]"
   autoFormat: false
   capitalizeAll: false
-  allowsEmotes: false
   commands:
     - /ooc
 
 shout:
   format: "{prefix}{player}: {message}"
-  range: -1
-  permission: "chat.shout"
+  range: 15
+  readPermission: "channel.shout.read"
+  writePermission: "channel.shout.write"
   default: false
   enabled: true
+  quotes: true
   prefix: "[SHOUT]"
+  autoFormat: true
+  capitalizeAll: true
   commands:
     - /shout
-  quotes: true
-  autoFormat: false
-  capitalizeAll: true

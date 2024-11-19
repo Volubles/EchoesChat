@@ -3,24 +3,30 @@ package com.voluble.echoeschat.managers;
 import com.voluble.echoeschat.ChatChannel;
 import com.voluble.echoeschat.EchoesChat;
 import com.voluble.echoeschat.utils.HexColorUtil;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ChannelManager {
 	private final EchoesChat plugin;
 	private final Map<String, ChatChannel> channels = new HashMap<>();
 	private final Map<Player, ChatChannel> playerChannels = new HashMap<>();
+	private final Map<UUID, List<String>> mutedChannels = new ConcurrentHashMap<>();
 
 	public ChannelManager(EchoesChat plugin) {
 		this.plugin = plugin;
 		loadChannels();
+	}
+
+	public Map<UUID, List<String>> getMutedChannels() {
+		return mutedChannels;
 	}
 
 	public void reloadChannels(FileConfiguration config) {
@@ -53,18 +59,24 @@ public class ChannelManager {
 				// Load properties of the channel
 				String format = channelSection.getString("format", "{player}: \"&f{message}&f\"");
 				int range = channelSection.getInt("range", -1);
-				String permission = channelSection.getString("permission", "");
+				String readPermission = channelSection.getString("readPermission", "");
+				String writePermission = channelSection.getString("writePermission", "");
 				boolean isDefault = channelSection.getBoolean("default", false);
 				boolean isEnabled = channelSection.getBoolean("enabled", true);
-				String prefix = channelSection.getString("prefix", ""); // Load prefix from channels.yml
+				String prefix = channelSection.getString("prefix", "");
 				List<String> commands = channelSection.getStringList("commands");
-				boolean quotes = channelSection.getBoolean("quotes", true); // Default to true if not specified
+				boolean quotes = channelSection.getBoolean("quotes", true);
 				boolean autoFormat = channelSection.getBoolean("autoFormat", true);
-				boolean capitalizeAll = channelSection.getBoolean("capitalizeAll", false); // Default to false
-				boolean allowsEmotes = channelSection.getBoolean("allowsEmotes", true); // Default to true if not specified
+				boolean capitalizeAll = channelSection.getBoolean("capitalizeAll", false);
+				boolean allowsEmotes = channelSection.getBoolean("allowsEmotes", true);
 
-				ChatChannel channel = new ChatChannel(channelName, format, range, permission, isDefault, isEnabled, commands, prefix, quotes, autoFormat, capitalizeAll, allowsEmotes);
-				channels.put(channelName, channel);
+				// Convert channelName to lowercase
+				String lowerCaseChannelName = channelName.toLowerCase();
+
+				ChatChannel channel = new ChatChannel(lowerCaseChannelName, format, range, readPermission, writePermission, isDefault, isEnabled, commands, prefix, quotes, autoFormat, capitalizeAll, allowsEmotes);
+
+				// Store channel with lowercase name as key
+				channels.put(lowerCaseChannelName, channel);
 			}
 		}
 
@@ -92,7 +104,7 @@ public class ChannelManager {
 
 	// Get all channels
 	public Map<String, ChatChannel> getAllChannels() {
-		return channels;
+		return channels != null ? channels : Collections.emptyMap();
 	}
 
 	public boolean broadcastToRange(Player sender, String formattedMessage, int range) {
@@ -113,5 +125,78 @@ public class ChannelManager {
 		sender.sendMessage(formattedMessage);
 
 		return someoneHeard;
+	}
+
+	// Method to mute the channel
+	public void muteChannel(Player player, String channelName) {
+		UUID playerUUID = player.getUniqueId();
+
+		// Debug: Log current mutedChannels map
+		System.out.println("Current mutedChannels: " + mutedChannels);
+
+		// Convert channelName to lowercase
+		String lowerCaseChannelName = channelName.toLowerCase();
+
+		// Ensure the channel exists
+		ChatChannel channel = channels.get(lowerCaseChannelName);
+		if (channel == null) {
+			player.sendMessage(ChatColor.RED + "Channel '" + channelName + "' does not exist.");
+			return;
+		}
+
+		// Initialize the player's muted channels list if absent
+		mutedChannels.putIfAbsent(playerUUID, new CopyOnWriteArrayList<>());
+		List<String> playerMutedChannels = mutedChannels.get(playerUUID);
+
+		if (!playerMutedChannels.contains(lowerCaseChannelName)) {
+			playerMutedChannels.add(lowerCaseChannelName);
+		} else {
+			player.sendMessage(ChatColor.RED + "Channel '" + channelName + "' is already muted.");
+		}
+
+		// Debug: Log updated mutedChannels map
+		System.out.println("Updated mutedChannels: " + mutedChannels);
+	}
+
+
+
+	public void unmuteChannel(Player player, String channelName) {
+		UUID playerUUID = player.getUniqueId();
+
+		// Ensure the channel exists
+		ChatChannel channel = channels.get(channelName.toLowerCase());
+		if (channel == null) {
+			player.sendMessage(ChatColor.RED + "Channel '" + channelName + "' does not exist.");
+			return;
+		}
+
+		List<String> playerMutedChannels = mutedChannels.get(playerUUID);
+
+		if (playerMutedChannels != null && playerMutedChannels.remove(channelName.toLowerCase())) {
+
+			// Remove the entry if the list is empty
+			if (playerMutedChannels.isEmpty()) {
+				mutedChannels.remove(playerUUID);
+			}
+		} else {
+			player.sendMessage(ChatColor.RED + "Channel '" + channelName + "' is not muted.");
+		}
+	}
+
+
+
+	// Method to check if a channel is muted for a player
+	public boolean isChannelMuted(Player player, String channelName) {
+		List<String> playerMutedChannels = mutedChannels.get(player.getUniqueId());
+
+		// Debugging: Show the current state of muted channels for this player
+		System.out.println("Muted channels for " + player.getName() + ": " + (playerMutedChannels != null ? playerMutedChannels : "None"));
+
+		// Ensure case consistency for channel names
+		return playerMutedChannels != null && playerMutedChannels.contains(channelName.toLowerCase());
+	}
+
+	public List<String> getMutedChannelsForDebugging(UUID playerUUID) {
+		return mutedChannels.getOrDefault(playerUUID, Collections.emptyList());
 	}
 }

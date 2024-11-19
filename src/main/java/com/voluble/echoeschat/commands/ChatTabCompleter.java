@@ -1,5 +1,7 @@
 package com.voluble.echoeschat.commands;
 
+import com.voluble.echoeschat.ChatChannel;
+import com.voluble.echoeschat.managers.ChannelManager;
 import com.voluble.echoeschat.managers.EmoteColorManager;
 import com.voluble.echoeschat.managers.EmoteColorManager.EmoteColorConfig;
 import org.bukkit.command.Command;
@@ -15,9 +17,11 @@ import java.util.Map;
 public class ChatTabCompleter implements TabCompleter {
 
 	private final EmoteColorManager emoteColorManager;
+	private final ChannelManager channelManager;
 
-	public ChatTabCompleter(EmoteColorManager emoteColorManager) {
+	public ChatTabCompleter(EmoteColorManager emoteColorManager, ChannelManager channelManager) {
 		this.emoteColorManager = emoteColorManager;
+		this.channelManager = channelManager;
 	}
 
 	@Override
@@ -28,12 +32,24 @@ public class ChatTabCompleter implements TabCompleter {
 
 		Player player = (Player) sender;
 
-		// Handle /chat command
 		if (args.length == 1) {
-			// Suggest "emotecolor" as the first argument
+			List<String> suggestions = new ArrayList<>();
+
+			// Suggest commands
 			if ("emotecolor".startsWith(args[0].toLowerCase())) {
-				return Collections.singletonList("emotecolor");
+				suggestions.add("emotecolor");
 			}
+			if ("reload".startsWith(args[0].toLowerCase()) && player.hasPermission("echoeschat.reload")) {
+				suggestions.add("reload");
+			}
+			if ("mutechannel".startsWith(args[0].toLowerCase())) {
+				suggestions.add("mutechannel");
+			}
+			if ("unmutechannel".startsWith(args[0].toLowerCase())) {
+				suggestions.add("unmutechannel");
+			}
+
+			return suggestions;
 		}
 
 		// Handle /chat emotecolor command
@@ -45,8 +61,44 @@ public class ChatTabCompleter implements TabCompleter {
 				String colorName = entry.getKey();
 				EmoteColorConfig colorConfig = entry.getValue();
 
-				if (player.hasPermission(colorConfig.getPermission()) && colorName.startsWith(args[1].toLowerCase())) {
+				if (player.hasPermission(colorConfig.getPermission()) && colorName.toLowerCase().startsWith(args[1].toLowerCase())) {
 					suggestions.add(colorName);
+				}
+			}
+
+			return suggestions;
+		}
+
+		// Tab completion for /chat mutechannel or /chat unmutechannel
+		if (args.length == 2 && (args[0].equalsIgnoreCase("mutechannel") || args[0].equalsIgnoreCase("unmutechannel"))) {
+			List<String> suggestions = new ArrayList<>();
+
+			// Suggest channels based on read permission
+			for (Map.Entry<String, ChatChannel> entry : channelManager.getAllChannels().entrySet()) {
+				String channelName = entry.getKey();
+				ChatChannel channel = entry.getValue();
+
+				// Check if the player has read permission for the channel
+				if (player.hasPermission(channel.getReadPermission()) && channelName.toLowerCase().startsWith(args[1].toLowerCase())) {
+					suggestions.add(channelName);
+				}
+			}
+
+			return suggestions;
+		}
+
+		// Tab completion for channels
+		if (args.length == 2 && args[0].equalsIgnoreCase("channel")) {
+			List<String> suggestions = new ArrayList<>();
+
+			// Suggest channels based on write permission
+			for (Map.Entry<String, ChatChannel> entry : channelManager.getAllChannels().entrySet()) {
+				String channelName = entry.getKey();
+				ChatChannel channel = entry.getValue();
+
+				// Check if the player has write permission for the channel
+				if (player.hasPermission(channel.getWritePermission()) && channelName.toLowerCase().startsWith(args[1].toLowerCase())) {
+					suggestions.add(channelName);
 				}
 			}
 

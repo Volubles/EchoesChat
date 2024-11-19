@@ -4,22 +4,22 @@ pluginVersion: 1.0.0
 # Configuration for emote colors
 emoteColors:
   default:
-    hex: "#FFFFFF"
+    color: "&e"
     permission: ""
-    deniedMessage: ""
+    deniedMessage: "You cannot use this color."
   red:
-    hex: "#FF0000"
-    permission: "echoeschat.emotecolor.red"
-    deniedMessage: "&cYou need the &6VIP &crank to use the red emote color!"
+    color: "&#FF0000"
+    permission: "emote.color.red"
+    deniedMessage: "You do not have permission to use red."
   blue:
-    hex: "#0000FF"
-    permission: "echoeschat.emotecolor.blue"
-    deniedMessage: "&cYou need the &6VIP &crank to use the blue emote color!"
+    color: "&#0000FF"
+    permission: "emote.color.blue"
+    deniedMessage: "You do not have permission to use blue."
   green:
-    hex: "#00FF00"
-    permission: "echoeschat.emotecolor.green"
-    deniedMessage: "&cYou need the &6VIP &crank to use the green emote color!"
+    color: "&#00FF00"
+    permission: "emote.color.green"
+    deniedMessage: "You do not have permission to use green."
   yellow:
-    hex: "#FFFF00"
-    permission: "echoeschat.emotecolor.yellow"
-    deniedMessage: "&cYou need the &6VIP &crank"
+    color: "&#FFFF00"
+    permission: "emote.color.yellow"
+    deniedMessage: "You do not have permission to use yellow."

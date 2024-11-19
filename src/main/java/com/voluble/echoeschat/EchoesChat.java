@@ -9,6 +9,7 @@ import com.voluble.echoeschat.listeners.PlayerJoinListener;
 import com.voluble.echoeschat.managers.ChannelManager;
 import com.voluble.echoeschat.managers.EmoteColorManager;
 import com.voluble.echoeschat.utils.CommandRegistrar;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -30,6 +31,7 @@ public final class EchoesChat extends JavaPlugin {
 	// Data configuration for saving player-specific data
 	private FileConfiguration dataConfig;
 	private File dataFile;
+	private ChatEventListener chatEventListener;
 
 	// Stores player UUIDs and their selected emote colors
 	private final Map<UUID, String> playerEmoteColors = new HashMap<>();
@@ -83,6 +85,7 @@ public final class EchoesChat extends JavaPlugin {
 
 		// Log the loaded channels for debugging purposes
 		getLogger().info("Loaded channels: " + channelManager.getAllChannels().keySet());
+		boolean isPlaceholderAPIEnabled = Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI");
 	}
 
 	/**
@@ -120,12 +123,12 @@ public final class EchoesChat extends JavaPlugin {
 			@Override
 			public boolean execute(CommandSender sender, String label, String[] args) {
 				// Delegate the entire command execution to ChatCommand
-				return new ChatCommand(EchoesChat.this, emoteColorManager, playerEmoteColors).onCommand(sender, this, label, args);
+				return new ChatCommand(EchoesChat.this, emoteColorManager, playerEmoteColors, channelManager).onCommand(sender, this, label, args);
 			}
 
 			@Override
 			public List<String> tabComplete(CommandSender sender, String alias, String[] args) {
-				ChatTabCompleter tabCompleter = new ChatTabCompleter(emoteColorManager);
+				ChatTabCompleter tabCompleter = new ChatTabCompleter(emoteColorManager, channelManager);
 				return tabCompleter.onTabComplete(sender, this, alias, args);
 			}
 		};
@@ -142,6 +145,7 @@ public final class EchoesChat extends JavaPlugin {
 		return new BukkitCommand(commandName) {
 			@Override
 			public boolean execute(CommandSender sender, String label, String[] args) {
+				// Create a new ChannelCommand instance and delegate the command execution
 				return new ChannelCommand(channel, channelManager, chatFormatter)
 						.onCommand(sender, this, label, args);
 			}
@@ -149,22 +153,30 @@ public final class EchoesChat extends JavaPlugin {
 			@Override
 			public List<String> tabComplete(CommandSender sender, String alias, String[] args) {
 				if (!(sender instanceof Player)) {
-					return Collections.emptyList();
+					return Collections.emptyList(); // Tab completion is only available for players
 				}
+
 				Player player = (Player) sender;
-				if (!player.hasPermission(channel.getPermission())) {
+
+				// Use read permission to suggest channels
+				if (!player.hasPermission(channel.getReadPermission())) {
 					return Collections.emptyList(); // Restrict tab completion for unauthorized players
 				}
-				return Collections.emptyList(); // Disable tab completion entirely for channel commands
+
+				// Additional filtering logic could be added here if necessary
+				return Collections.emptyList(); // Provide appropriate tab completions if needed
 			}
 
 			@Override
 			public boolean testPermissionSilent(CommandSender sender) {
+				// Check if the sender has either read or write permission for the channel
 				if (sender instanceof Player) {
-					return ((Player) sender).hasPermission(channel.getPermission());
+					Player player = (Player) sender;
+					return player.hasPermission(channel.getReadPermission()) || player.hasPermission(channel.getWritePermission());
 				}
 				return false;
 			}
+
 		};
 	}
 
@@ -172,7 +184,8 @@ public final class EchoesChat extends JavaPlugin {
 	 * Registers event listeners for the plugin.
 	 */
 	private void registerListeners() {
-		getServer().getPluginManager().registerEvents(new ChatEventListener(channelManager, chatFormatter), this);
+		// Correct order: EchoesChat (this), ChannelManager, ChatFormatter
+		getServer().getPluginManager().registerEvents(new ChatEventListener(this, channelManager, chatFormatter), this);
 		getServer().getPluginManager().registerEvents(new PlayerJoinListener(channelManager, emoteColorManager, playerEmoteColors), this);
 	}
 
